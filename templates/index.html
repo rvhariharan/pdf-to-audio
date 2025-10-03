@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>TextTalk</title>
+    <link rel="icon" href="{{ url_for('static', filename='assets/H.png') }}" type="image/png">
+</head>
+<body class="bg-white font-sans text-slate-800">
+
+    <div class="w-full min-h-screen p-6 md:p-12">
+        <div class="max-w-3xl mx-auto">
+
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-bold text-slate-900">TextTalk</h1>
+                <p class="text-md mt-2 text-slate-500">"Speak in pixels, connect in meaning."</p>
+            </div>
+
+            <form id="upload-form" action="/" method="post" enctype="multipart/form-data" class="space-y-6">
+                
+                <div>
+                    <label for="file" class="block text-sm font-medium text-gray-700 mb-2">Upload Your File</label>
+                    <input type="file" name="file" required accept=".pdf" class="block w-full text-sm text-slate-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-orange-50 file:text-orange-700
+                        hover:file:bg-orange-100 cursor-pointer"/>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="voice" class="block text-sm font-medium text-gray-700 mb-2">Choose Voice</label>
+                        <select name="voice" class="w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="speed" class="block text-sm font-medium text-gray-700 mb-2">Speed (0.5 to 2.0)</label>
+                        <input type="number" step="0.1" min="0.5" max="2.0" name="speed" value="1.0" class="w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-bold text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-300">
+                        Convert to Audio
+                    </button>
+                </div>
+            </form>
+
+                <div class="text-center my-8">
+                <a href="{{ url_for('download_app') }}" class="inline-block py-3 px-6 border border-transparent rounded-md shadow-sm text-lg font-bold text-white bg-gray-700 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-300">
+                    Download Desktop App
+                </a>
+                <p class="text-xs mt-2 text-slate-400">For Windows (.exe)</p>
+            </div>
+            <hr class="my-10">
+
+            <div>
+                <h2 class="text-2xl font-semibold mb-4 text-slate-900">Available Audio Files</h2>
+                <ul id="audio-list" class="space-y-4">
+                    {% for audio in audio_files %}
+                    <li class="flex items-center justify-between gap-4 rounded-lg bg-slate-50 p-4 border border-slate-200">
+                        <audio controls class="flex-grow">
+                            <source src="{{ url_for('static', filename='audio/' + audio) }}" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="flex items-center gap-3 flex-shrink-0">
+                            <a href="{{ url_for('download_audio', filename=audio) }}" class="text-sm font-medium text-orange-600 hover:underline">Download</a>
+                            <form action="{{ url_for('delete_audio', filename=audio) }}" method="post" class="m-0">
+                                <button type="submit" class="bg-red-100 text-red-700 hover:bg-red-200 text-xs font-bold py-1 px-3 rounded-full transition-colors">Delete</button>
+                            </form>
+                        </div>
+                    </li>
+                    {% endfor %}
+
+                    {% if not audio_files %}
+                    <li class="text-center text-slate-500 py-6 px-4 rounded-lg bg-slate-50 border border-dashed no-files-message">
+                        No audio files have been generated yet.
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+<script>
+    const uploadForm = document.getElementById('upload-form');
+    const audioList = document.getElementById('audio-list');
+    const submitButton = uploadForm.querySelector('button[type="submit"]');
+
+    uploadForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        submitButton.disabled = true;
+        submitButton.textContent = 'Converting, please wait...';
+        
+        const formData = new FormData(uploadForm);
+
+        fetch('/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.error || 'Something went wrong') });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            const filename = data.audio_url.split('/').pop();
+            const noFilesLi = audioList.querySelector('.no-files-message');
+            if (noFilesLi) {
+                noFilesLi.remove();
+            }
+
+            const newAudioItemHTML = `
+            <li class="flex items-center justify-between gap-4 rounded-lg bg-slate-50 p-4 border border-slate-200">
+                <audio controls class="flex-grow">
+                    <source src="${data.audio_url}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <a href="/download/${filename}" class="text-sm font-medium text-orange-600 hover:underline">Download</a>
+                    <form action="/delete/${filename}" method="post" class="m-0">
+                        <button type="submit" class="bg-red-100 text-red-700 hover:bg-red-200 text-xs font-bold py-1 px-3 rounded-full transition-colors">Delete</button>
+                    </form>
+                </div>
+            </li>`;
+
+            audioList.insertAdjacentHTML('afterbegin', newAudioItemHTML);
+            uploadForm.reset();
+        })
+        .catch(error => {
+            console.error('There was a problem:', error);
+            alert('An error occurred: ' + error.message);
+        })
+        .finally(() => {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Convert to Audio';
+        });
+    });
+
+    const noFilesLi = audioList.querySelector('li.text-center');
+    if (noFilesLi) {
+        noFilesLi.classList.add('no-files-message');
+    }
+</script>
+
+</body>
+</html>
