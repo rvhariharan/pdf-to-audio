@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, send_file, redirect, url_for, jsonify
 import os
-import edge_tts
-import asyncio
+from gtts import gTTS
 import time
 from PyPDF2 import PdfReader
 from werkzeug.utils import secure_filename 
@@ -30,41 +29,37 @@ def extract_text_from_pdf(pdf_path):
         return None
     return text.strip()
 
-# --- 2. ASYNC AUDIO GENERATION ---
-async def generate_audio_edge(text, output_file, voice_short_name):
-    communicate = edge_tts.Communicate(text, voice_short_name)
-    await communicate.save(output_file)
-
-# --- 3. CONVERSION LOGIC (FIXED FOR RENDER) ---
+# --- 2. CONVERSION LOGIC (Using gTTS for Reliability) ---
 def convert_text_to_audio(text, output_file, voice_type="Male"):
     try:
-        # Check if text is empty before trying to convert
         if not text or len(text.strip()) == 0:
-            print("Error: No text found to convert.")
             return False
 
-        # Select Voice
+        # Google TTS Trick for Voices:
+        # gTTS doesn't have "Male/Female" switch, but we can change accents (TLD).
+        # 'us' = US English (Standard Female-ish)
+        # 'co.in' = Indian English (Often sounds slightly different/Male-ish in some versions or just distinct)
+        # 'co.uk' = British English
+        
         if voice_type == "Male":
-            voice_id = "en-US-GuyNeural"
+            # Using Indian accent or UK to simulate a different tone
+            tld_option = 'co.in' 
         else:
-            voice_id = "en-US-AriaNeural"
-            
-        # [IMPORTANT FIX]
-        # Render/Gunicorn la 'asyncio.run()' direct ah work aagathu.
-        # So, manual ah oru Puthiya Event Loop create panni run panrom.
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            loop.run_until_complete(generate_audio_edge(text, output_file, voice_id))
-        finally:
-            loop.close()
+            # Standard US Female voice
+            tld_option = 'us'
+
+        # Create gTTS object
+        tts = gTTS(text=text, lang='en', tld=tld_option, slow=False)
+        
+        # Save file
+        tts.save(output_file)
             
         return True
     except Exception as e:
         print(f"CRITICAL ERROR converting text to audio: {e}")
         return False
 
-# --- 4. ROUTES ---
+# --- 3. ROUTES ---
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
@@ -85,7 +80,7 @@ def upload_file():
             # Step 1: Extract Text
             text = extract_text_from_pdf(pdf_path)
             
-            # Step 2: Validation (Scanned PDF Check)
+            # Step 2: Validation
             if not text or len(text.strip()) == 0:
                 return jsonify({"error": "Empty PDF or Scanned Image detected. Cannot read text."}), 400
 
@@ -97,7 +92,7 @@ def upload_file():
             success = convert_text_to_audio(text, audio_path, voice_type)
             
             if not success:
-                return jsonify({"error": "Failed to convert text to audio. Check server logs."}), 500
+                return jsonify({"error": "Server Error: Could not convert text."}), 500
 
             # Step 5: Send Response
             return jsonify({
