@@ -1,157 +1,273 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>TextTalk</title>
+    <title>TextTalk - AI Audio Converter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <link rel="icon" href="{{ url_for('static', filename='assets/H.png') }}" type="image/png">
+      
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        edgeOrange: '#FF4B2B',
+                        edgeBlack: '#070707',
+                    },
+                    fontFamily: {
+                        cinzel: ['"Cinzel Decorative"', 'cursive'],
+                        heading: ['Roboto Slab', 'serif'], 
+                        body: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #fb923c; border-radius: 4px; }
+    </style>
 </head>
-<body class="bg-white font-sans text-slate-800">
+<body class="bg-white text-slate-900">
 
-    <div class="w-full min-h-screen p-6 md:p-12">
-        <div class="max-w-3xl mx-auto">
+    <nav class="w-full py-6 px-6 md:px-12 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-md z-50 border-b border-slate-100">
+        
+        <div class="flex items-center gap-3">
+            <div>
+                <img 
+                  src="{{ url_for('static', filename='assets/H.png') }}" 
+                  alt="Logo"
+                  class="w-12 h-12 object-cover rounded-md border border-white/20 shadow-md"
+                >
+            </div>
+            <a href="#" class="font-cinzel text-edgeOrange text-2xl font-[1000]">
+              TE<span class="text-black">X</span>TT<span class="text-black">A</span>LK
+            </a>
+        </div>
 
-            <div class="text-center mb-10">
-                <h1 class="text-4xl font-bold text-slate-900">TextTalk</h1>
-                <p class="text-md mt-2 text-slate-500">"Speak in pixels, connect in meaning."</p>
+        <div class="flex items-center gap-4">
+            <a href="#rules" class="hidden md:block font-bold text-sm hover:text-orange-600 transition-colors">How it works</a>
+            <a href="{{ url_for('download_app') }}" class="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-orange-600 transition-all">
+                <i class="fa-brands fa-windows"></i> Download App
+            </a>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 md:px-1 py-1 lg:py-2 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+        <div class="space-y-8 mt-8 lg:mt-0"> <div class="space-y-1">
+                <h1 class="text-5xl md:text-6xl font-black leading-tight text-slate-1000">
+                    TURN TEXT <br> INTO <br>
+                    <span class="text-orange-600">SPEECH INSTANTLY.</span>
+                </h1>
+                <p class="text-lg text-slate-500 font-medium max-w-lg mt-4">
+                    Try this easy-to-use free PDF to Audio converter. Grab your study materials or ebooks.
+                </p>
             </div>
 
             <form id="upload-form" action="/" method="post" enctype="multipart/form-data" class="space-y-6">
                 
-                <div>
-                    <label for="file" class="block text-sm font-medium text-gray-700 mb-2">Upload Your File</label>
-                    <input type="file" name="file" required accept=".pdf" class="block w-full text-sm text-slate-500
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-full file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-orange-50 file:text-orange-700
-                        hover:file:bg-orange-100 cursor-pointer"/>
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="cursor-pointer group">
+                        <input type="radio" name="voice" value="Male" class="peer sr-only" checked>
+                        <div class="border-2 border-slate-200 rounded-xl p-4 flex items-center gap-3 hover:border-black peer-checked:border-orange-600 peer-checked:bg-orange-50 transition-all">
+                            <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 peer-checked:bg-orange-200 peer-checked:text-orange-700">
+                                <i class="fa-solid fa-person text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm">Male Voice</h3>
+                                <p class="text-xs text-slate-500">Natural & Deep</p>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="cursor-pointer group">
+                        <input type="radio" name="voice" value="Female" class="peer sr-only">
+                        <div class="border-2 border-slate-200 rounded-xl p-4 flex items-center gap-3 hover:border-black peer-checked:border-orange-600 peer-checked:bg-orange-50 transition-all">
+                            <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 peer-checked:bg-orange-200 peer-checked:text-orange-700">
+                                <i class="fa-solid fa-person-dress text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm">Female Voice</h3>
+                                <p class="text-xs text-slate-500">Clear & Soft</p>
+                            </div>
+                        </div>
+                    </label>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="voice" class="block text-sm font-medium text-gray-700 mb-2">Choose Voice</label>
-                        <select name="voice" class="w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="speed" class="block text-sm font-medium text-gray-700 mb-2">Speed (0.5 to 2.0)</label>
-                        <input type="number" step="0.1" min="0.5" max="2.0" name="speed" value="1.0" class="w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">2. Upload Document</label>
+                    <div class="relative group">
+                        <div id="drop-area" class="relative h-32 border-2 border-dashed border-slate-300 rounded-2xl bg-white p-6 flex flex-col items-center justify-center text-center hover:border-orange-500 hover:bg-orange-50/30 transition-all cursor-pointer shadow-sm">
+    <input type="file" name="file" required accept=".pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" id="file-input">
+    
+    <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-300 group-hover:text-orange-500 mb-2 transition-colors duration-300"></i>
+    
+    <p class="text-sm font-medium text-slate-600" id="file-label">Drag & Drop PDF or <span class="text-orange-600 underline">Browse</span></p>
+    
+    <p class="text-xs text-slate-400 mt-1" id="file-sub-label">Max file size: 10MB</p> 
+</div>
                     </div>
                 </div>
 
-                <div>
-                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-bold text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-300">
-                        Convert to Audio
+                <div class="flex flex-col sm:flex-row gap-4 pt-2">
+                    <button type="submit" class="flex-1 py-4 px-6 rounded-xl bg-orange-600 text-white font-bold text-lg hover:bg-orange-700 shadow-lg shadow-orange-200 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Convert Now
                     </button>
+                    
+                    <a href="{{ url_for('download_app') }}" class="px-6 py-4 rounded-xl border-2 border-slate-200 font-bold text-slate-700 hover:border-black hover:text-black transition-all flex items-center justify-center gap-2">
+                        <i class="fa-brands fa-windows"></i> Desktop App
+                    </a>
                 </div>
+
             </form>
 
-                <div class="text-center my-8">
-                <a href="{{ url_for('download_app') }}" class="inline-block py-3 px-6 border border-transparent rounded-md shadow-sm text-lg font-bold text-white bg-gray-700 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-300">
-                    Download Desktop App
-                </a>
-                <p class="text-xs mt-2 text-slate-400">For Windows (.exe)</p>
+            <div id="audio-section" class="hidden bg-slate-50 border border-slate-200 rounded-xl p-5 mt-6">
+                <h3 class="font-bold text-slate-900 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-check-circle text-orange-600"></i> Success!
+                </h3>
+                <ul id="audio-list" class="space-y-3"></ul>
             </div>
-            <hr class="my-10">
-
-            <div>
-                <h2 class="text-2xl font-semibold mb-4 text-slate-900">Available Audio Files</h2>
-                <ul id="audio-list" class="space-y-4">
-                    {% for audio in audio_files %}
-                    <li class="flex items-center justify-between gap-4 rounded-lg bg-slate-50 p-4 border border-slate-200">
-                        <audio controls class="flex-grow">
-                            <source src="{{ url_for('static', filename='audio/' + audio) }}" type="audio/mpeg">
-                            Your browser does not support the audio element.
-                        </audio>
-                        <div class="flex items-center gap-3 flex-shrink-0">
-                            <a href="{{ url_for('download_audio', filename=audio) }}" class="text-sm font-medium text-orange-600 hover:underline">Download</a>
-                            <form action="{{ url_for('delete_audio', filename=audio) }}" method="post" class="m-0">
-                                <button type="submit" class="bg-red-100 text-red-700 hover:bg-red-200 text-xs font-bold py-1 px-3 rounded-full transition-colors">Delete</button>
-                            </form>
-                        </div>
-                    </li>
-                    {% endfor %}
-
-                    {% if not audio_files %}
-                    <li class="text-center text-slate-500 py-6 px-4 rounded-lg bg-slate-50 border border-dashed no-files-message">
-                        No audio files have been generated yet.
-                    </li>
-                    {% endif %}
-                </ul>
-            </div>
-
         </div>
-    </div>
+
+        <div class="relative h-full flex items-center py-10" id="rules">
+            <div class="w-full bg-slate-900 text-white rounded-3xl p-4 md:p-6 shadow-2xl relative overflow-hidden min-h-[500px] flex flex-col justify-center">
+                
+                <div class="absolute top-0 right-0 w-64 h-64 bg-orange-500 rounded-full blur-[100px] opacity-20"></div>
+
+                <div class="relative z-10 space-y-10">
+                    
+                    <div>
+                        <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm border border-white/10">
+                            <span class="font-black text-3xl text-orange-500">1</span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">Upload & Select</h3>
+                        <p class="text-slate-400">Upload your PDF document. Our system accepts standard text-based PDFs. Select your preferred AI voice gender.</p>
+                    </div>
+
+                    <div>
+                        <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm border border-white/10">
+                            <span class="font-black text-3xl text-orange-500">2</span>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">App Download</h3>
+                        <p class="text-slate-400">Go Offline! Download the TextTalk Desktop App for faster conversions directly on your PC.</p>
+                    </div>
+
+                    <div class="p-6 bg-white/5 rounded-2xl border border-white/10">
+                        <h4 class="font-bold text-orange-400 uppercase text-xs tracking-wider mb-3">Usage Policy</h4>
+                        <ul class="space-y-2 text-sm text-slate-300">
+                            <li><i class="fa-solid fa-shield-halved text-slate-500 mr-2"></i> Files are processed securely.</li>
+                            <li><i class="fa-solid fa-file-circle-xmark text-slate-500 mr-2"></i> Password protected PDFs not supported.</li>
+                            <li><i class="fa-solid fa-clock text-slate-500 mr-2"></i> Max 2 mins conversion time.</li>
+                            <li><i class="fa-solid fa-user-lock text-slate-500 mr-2"></i>Links are temporary. Download immediately.</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center py-8 text-slate-400 text-sm">
+        <p>&copy; 2025 TextTalk. All rights reserved.</p>
+    </footer>
 
 <script>
     const uploadForm = document.getElementById('upload-form');
     const audioList = document.getElementById('audio-list');
+    const audioSection = document.getElementById('audio-section');
     const submitButton = uploadForm.querySelector('button[type="submit"]');
+    
+    // IDs Check panikonga
+    const fileInput = document.getElementById('file-input');
+    const fileLabel = document.getElementById('file-label');
+    const fileSubLabel = document.getElementById('file-sub-label'); // Ithu than mukkiyam
+    const dropArea = document.getElementById('drop-area');
+
+    // UI Feedback for File Selection
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            const fileName = e.target.files[0].name;
+            
+            // Drop area highlight
+            dropArea.classList.add('border-orange-500', 'bg-orange-50');
+            dropArea.classList.remove('border-slate-300');
+            
+            // Change Main Text
+            fileLabel.innerHTML = `<span class="text-slate-900 font-bold">${fileName}</span>`;
+            fileLabel.classList.add('truncate', 'px-4');
+            
+            // Change Sub Text (Inga than error vanthuchu, ippo fix aagidum)
+            if(fileSubLabel) {
+                fileSubLabel.textContent = "Ready to convert";
+                fileSubLabel.classList.add('text-orange-600', 'font-bold');
+            }
+        }
+    });
 
     uploadForm.addEventListener('submit', function(event) {
         event.preventDefault();
 
+        const originalBtnContent = submitButton.innerHTML;
         submitButton.disabled = true;
-        submitButton.textContent = 'Converting, please wait...';
+        submitButton.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Converting...`;
+        submitButton.classList.add('opacity-80');
         
         const formData = new FormData(uploadForm);
 
-        fetch('/', {
-            method: 'POST',
-            body: formData
-        })
+        fetch('/', { method: 'POST', body: formData })
         .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => { throw new Error(err.error || 'Something went wrong') });
-            }
+            if (!response.ok) return response.json().then(err => { throw new Error(err.error || 'Error') });
             return response.json();
         })
         .then(data => {
-            if (data.error) {
-                throw new Error(data.error);
-            }
-            
-            const filename = data.audio_url.split('/').pop();
-            const noFilesLi = audioList.querySelector('.no-files-message');
-            if (noFilesLi) {
-                noFilesLi.remove();
-            }
+            audioSection.classList.remove('hidden');
+            const filename = data.filename;
+            const audioUrl = data.audio_url;
 
             const newAudioItemHTML = `
-            <li class="flex items-center justify-between gap-4 rounded-lg bg-slate-50 p-4 border border-slate-200">
-                <audio controls class="flex-grow">
-                    <source src="${data.audio_url}" type="audio/mpeg">
-                    Your browser does not support the audio element.
-                </audio>
-                <div class="flex items-center gap-3 flex-shrink-0">
-                    <a href="/download/${filename}" class="text-sm font-medium text-orange-600 hover:underline">Download</a>
-                    <form action="/delete/${filename}" method="post" class="m-0">
-                        <button type="submit" class="bg-red-100 text-red-700 hover:bg-red-200 text-xs font-bold py-1 px-3 rounded-full transition-colors">Delete</button>
-                    </form>
+            <li class="flex items-center justify-between gap-4 bg-white p-3 rounded-lg border border-slate-200 shadow-sm animate-pulse">
+                <div class="flex-grow min-w-0">
+                    <audio controls class="w-full h-8 block">
+                        <source src="${audioUrl}" type="audio/mpeg">
+                        Your browser does not support audio.
+                    </audio>
                 </div>
+                <a href="/download/${filename}" class="flex-shrink-0 bg-black text-white p-2 rounded hover:bg-orange-600 transition-colors" title="Download">
+                    <i class="fa-solid fa-download"></i>
+                </a>
             </li>`;
 
             audioList.insertAdjacentHTML('afterbegin', newAudioItemHTML);
             uploadForm.reset();
+            
+            // Reset File UI
+            dropArea.classList.remove('border-orange-500', 'bg-orange-50');
+            dropArea.classList.add('border-slate-300');
+            fileLabel.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-orange-600 mr-2"></i> Click to Upload PDF`;
+            
+            if(fileSubLabel) {
+                fileSubLabel.textContent = "Max file size 10MB";
+                fileSubLabel.classList.remove('text-orange-600', 'font-bold');
+            }
         })
-        .catch(error => {
-            console.error('There was a problem:', error);
-            alert('An error occurred: ' + error.message);
-        })
+        .catch(error => { alert(error.message); })
         .finally(() => {
             submitButton.disabled = false;
-            submitButton.textContent = 'Convert to Audio';
+            submitButton.innerHTML = originalBtnContent;
+            submitButton.classList.remove('opacity-80');
         });
     });
-
-    const noFilesLi = audioList.querySelector('li.text-center');
-    if (noFilesLi) {
-        noFilesLi.classList.add('no-files-message');
-    }
 </script>
+
 </body>
 </html>
